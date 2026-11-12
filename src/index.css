@@ -1,0 +1,314 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #EDEBE6;
+  --sheet: #F4F2ED;
+  --ink: #141414;
+  --muted: #6D6A63;
+  --cobalt: #1F3FB0;
+  --rule: rgba(20, 20, 20, 0.9);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-sheet: cubic-bezier(0.76, 0, 0.18, 1);
+  --H: min(46vh, 31vw);
+  --ws: 70px;
+  --d: 210px;
+  --font-sans: "Inter Tight", "Noto Sans JP", system-ui, -apple-system, sans-serif;
+  --font-serif: "Newsreader", Georgia, serif;
+  --font-sc: "Noto Serif SC", serif;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --H: min(60vw, 40svh);
+  }
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (pointer: fine) {
+  html, body, button, a, [role="button"], input {
+    cursor: none !important;
+  }
+}
+
+.lbl {
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 10.5px;
+  line-height: 1;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 21px;
+  padding: 0 8px;
+  border: 1px solid var(--rule);
+  box-sizing: border-box;
+  text-decoration: none;
+  color: var(--ink);
+  background: transparent;
+  white-space: nowrap;
+}
+
+.box:focus-visible {
+  outline: 2px solid var(--cobalt);
+  outline-offset: 1px;
+}
+
+/* 3D Shelf Styles */
+.shelf-stage-container {
+  perspective: 2200px;
+  perspective-origin: 50% 50%;
+  touch-action: pan-y;
+  position: fixed;
+  left: 0;
+  right: 0;
+  width: 100%;
+  pointer-events: auto;
+}
+
+.stage {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.tape {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+
+.tape-face {
+  position: absolute;
+  top: calc(-0.5 * var(--H));
+  height: var(--H);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 2px;
+  background-repeat: no-repeat;
+  box-sizing: border-box;
+}
+
+.tape-face::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-color: #000;
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: var(--shade, 0);
+  transition: opacity 0.05s linear;
+}
+
+.tape-spine {
+  width: var(--ws);
+  left: calc(-0.5 * var(--ws));
+  transform: translateZ(calc(0.5 * var(--d)));
+}
+
+.tape-cover {
+  width: var(--d);
+  left: calc(-0.5 * var(--d));
+  transform: rotateY(90deg) translateZ(calc(0.5 * var(--ws)));
+  box-shadow: 0 30px 60px -28px rgba(20, 16, 10, 0.55);
+}
+
+/* Paper grain overlay */
+.paper-grain-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 40;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+}
+
+/* Music Player Equalizer Animations */
+@keyframes eq-bounce-1 {
+  0%, 100% { height: 4px; }
+  50% { height: 15px; }
+}
+@keyframes eq-bounce-2 {
+  0%, 100% { height: 14px; }
+  50% { height: 6px; }
+}
+@keyframes eq-bounce-3 {
+  0%, 100% { height: 7px; }
+  50% { height: 16px; }
+}
+
+.eq-bar-1 { animation: eq-bounce-1 0.75s ease-in-out infinite; }
+.eq-bar-2 { animation: eq-bounce-2 0.6s ease-in-out infinite; }
+.eq-bar-3 { animation: eq-bounce-3 0.85s ease-in-out infinite; }
+
+/* Custom Cursor - strictly fine pointers and desktop */
+.custom-cursor {
+  display: none;
+}
+
+@media (pointer: fine) and (min-width: 768px) {
+  .custom-cursor {
+    display: block;
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 58px;
+    height: 58px;
+    margin-left: -29px;
+    margin-top: -29px;
+    pointer-events: none;
+    z-index: 100;
+    will-change: transform;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .custom-cursor.cursor--visible {
+    opacity: 1;
+  }
+}
+
+.cursor-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  background-color: transparent;
+  transform-origin: center;
+  transition: transform 0.5s var(--ease), background-color 0.4s var(--ease), border-color 0.4s var(--ease);
+}
+
+.cursor-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-left: -3px;
+  margin-top: -3px;
+  border-radius: 50%;
+  background-color: var(--ink);
+  transform-origin: center;
+  transition: transform 0.4s var(--ease);
+}
+
+.cursor-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 10px;
+  line-height: 1.25;
+  letter-spacing: 0.1em;
+  transform-origin: center;
+  transition: transform 0.45s var(--ease);
+}
+
+/* Cursor State Variations */
+.cursor--spine .cursor-ring {
+  transform: scale(0.72);
+}
+.cursor--spine .cursor-dot {
+  transform: scale(1);
+}
+.cursor--spine .cursor-label {
+  transform: scale(0);
+}
+
+.cursor--btn .cursor-ring {
+  transform: scale(0.55);
+}
+.cursor--btn .cursor-dot {
+  transform: scale(0);
+}
+.cursor--btn .cursor-label {
+  transform: scale(0);
+}
+
+.cursor--open .cursor-ring {
+  transform: scale(1.75);
+  background-color: var(--cobalt);
+  border-color: var(--cobalt);
+}
+.cursor--open .cursor-dot {
+  transform: scale(0);
+}
+.cursor--open .cursor-label {
+  transform: scale(1);
+}
+
+.cursor--default .cursor-ring {
+  transform: scale(1);
+}
+.cursor--default .cursor-dot {
+  transform: scale(1);
+}
+.cursor--default .cursor-label {
+  transform: scale(0);
+}
+
+/* Audio Player Equalizer Animations */
+@keyframes eq-bounce-1 {
+  0%, 100% { height: 4px; }
+  50% { height: 14px; }
+}
+@keyframes eq-bounce-2 {
+  0%, 100% { height: 14px; }
+  50% { height: 5px; }
+}
+@keyframes eq-bounce-3 {
+  0%, 100% { height: 6px; }
+  50% { height: 15px; }
+}
+
+.eq-bar-1 {
+  animation: eq-bounce-1 0.8s ease-in-out infinite;
+}
+.eq-bar-2 {
+  animation: eq-bounce-2 0.65s ease-in-out infinite 0.15s;
+}
+.eq-bar-3 {
+  animation: eq-bounce-3 0.9s ease-in-out infinite 0.3s;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
